@@ -6,25 +6,46 @@ function [parameters] = DatasetPrep(parameters)
     % Pull out data you need
     rest = parameters.rest_data;
     walk = parameters.walk_data;
-
-    % Make dummy variables for rest and walk (response variables). [1 0] =
-    % rest. [0 1] = walk.
-    responseVariables = [repmat([1 0], size(rest, 3), 1); repmat([0 1], size(walk, 3), 1)];
     
-    % Make explanatory variables (the corrs together)
-    explanatoryVariables = cat(3, rest, walk);
+    % if correlations, 
+    if strcmp(parameters.data_type, 'correlations')
 
-    % Run Fisher transform
-    if isfield(parameters, 'run_FisherTransform') && parameters.run_FisherTransform
+        % Make dummy variables for rest and walk (response variables). [1 0] =
+        % rest. [0 1] = walk.
+        responseVariables = [repmat([1 0], size(rest, 3), 1); repmat([0 1], size(walk, 3), 1)];
 
-        explanatoryVariables = atanh(explanatoryVariables);
+        % Make explanatory variables (the corrs together)
+        explanatoryVariables = cat(3, rest, walk);
+    
+        % Run Fisher transform
+        if isfield(parameters, 'run_FisherTransform') && parameters.run_FisherTransform
+    
+            explanatoryVariables = atanh(explanatoryVariables);
+    
+        end 
+    
+        % reshape explanatoryVarables into vector without repeating values
+        explanatoryVariables = [reshape(explanatoryVariables, size(rest, 1) * size(rest,2), size(explanatoryVariables, 3))]';
+        indices = find(tril(ones(size(rest, 1)), -1));
+        explanatoryVariables = explanatoryVariables(:, indices);
+   
+    % if fluorescence
+    elseif strcmp(parameters.data_type, 'fluorescence')
+       
+        % Make dummy variables for rest and walk (response variables). [1 0] =
+        % rest. [0 1] = walk.
+        responseVariables = [repmat([1 0], size(rest, 2), 1); repmat([0 1], size(walk, 2), 1)];
+        
+        % Make explanatory variables (the fluors together)
+        explanatoryVariables = cat(2, rest, walk);
 
-    end 
+        % transpose explanatory variables
+        explanatoryVariables = explanatoryVariables';
 
-    % reshape explanatoryVarables into vector without repeating values
-    explanatoryVariables = [reshape(explanatoryVariables, size(rest, 1) * size(rest,2), size(explanatoryVariables, 3))]';
-    indices = find(tril(ones(size(rest, 1)), -1));
-    explanatoryVariables = explanatoryVariables(:, indices);
+    else 
+        error('No matching data type.')
+
+    end
 
     % Remove any rows containing NaNs
     nan_rows = find(any(isnan(explanatoryVariables), 2));
