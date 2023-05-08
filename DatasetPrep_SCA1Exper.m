@@ -3,49 +3,73 @@ function [parameters] = DatasetPrep(parameters)
 
     MessageToUser('Prepping ' , parameters);
 
-    % Pull out data you need
-    rest = parameters.rest_data;
-    walk = parameters.walk_data;
-    
-    % if correlations, 
-    if strcmp(parameters.data_type, 'correlations')
+    if isfield(parameters, 'data_type_looping') && parameters.data_type_looping
 
-        % Make dummy variables for rest and walk (response variables). [1 0] =
-        % rest. [0 1] = walk.
-        responseVariables = [repmat([1 0], size(rest, 3), 1); repmat([0 1], size(walk, 3), 1)];
+        parameters.data_type = parameters.values{strcmp(parameters.keywords,'data_type')};
 
-        % Make explanatory variables (the corrs together)
-        explanatoryVariables = cat(3, rest, walk);
+    end 
+
+    % Within mice
+    if strcmp(parameters.compare_across, 'withinMice')
+        % Pull out data you need
+        rest = parameters.rest_data;
+        walk = parameters.walk_data;
     
-        % Run Fisher transform
-        if isfield(parameters, 'run_FisherTransform') && parameters.run_FisherTransform
+        % if correlations, 
+        if strcmp(parameters.data_type, 'correlations')
     
-            explanatoryVariables = atanh(explanatoryVariables);
+            % Make dummy variables for rest and walk (response variables). [1 0] =
+            % rest. [0 1] = walk.
+            responseVariables = [repmat([1 0], size(rest, 3), 1); repmat([0 1], size(walk, 3), 1)];
     
-        end 
-    
-        % reshape explanatoryVarables into vector without repeating values
-        explanatoryVariables = [reshape(explanatoryVariables, size(rest, 1) * size(rest,2), size(explanatoryVariables, 3))]';
-        indices = find(tril(ones(size(rest, 1)), -1));
-        explanatoryVariables = explanatoryVariables(:, indices);
-   
-    % if fluorescence
-    elseif strcmp(parameters.data_type, 'fluorescence')
-       
-        % Make dummy variables for rest and walk (response variables). [1 0] =
-        % rest. [0 1] = walk.
-        responseVariables = [repmat([1 0], size(rest, 2), 1); repmat([0 1], size(walk, 2), 1)];
+            % Make explanatory variables (the corrs together)
+            explanatoryVariables = cat(3, rest, walk);
         
-        % Make explanatory variables (the fluors together)
-        explanatoryVariables = cat(2, rest, walk);
+            % Run Fisher transform
+            if isfield(parameters, 'run_FisherTransform') && parameters.run_FisherTransform
+        
+                explanatoryVariables = atanh(explanatoryVariables);
+        
+            end 
+        
+            % reshape explanatoryVarables into vector without repeating values
+            explanatoryVariables = [reshape(explanatoryVariables, size(rest, 1) * size(rest,2), size(explanatoryVariables, 3))]';
+            indices = find(tril(ones(size(rest, 1)), -1));
+            explanatoryVariables = explanatoryVariables(:, indices);
+       
+        % if fluorescence
+        elseif strcmp(parameters.data_type, 'fluorescence')
+           
+            % Make dummy variables for rest and walk (response variables). [1 0] =
+            % rest. [0 1] = walk.
+            responseVariables = [repmat([1 0], size(rest, 2), 1); repmat([0 1], size(walk, 2), 1)];
+            
+            % Make explanatory variables (the fluors together)
+            explanatoryVariables = cat(2, rest, walk);
+    
+            % transpose explanatory variables
+            explanatoryVariables = explanatoryVariables';
+    
+        else 
+            error('No matching data type.')
+    
+        end
 
-        % transpose explanatory variables
-        explanatoryVariables = explanatoryVariables';
+    % Across mice 
+    elseif strcmp(parameters.compare_across, 'acrossMice')
 
-    else 
-        error('No matching data type.')
+        % if correlations, 
+        if strcmp(parameters.data_type, 'correlations')
+        
+        % if fluorescence
+        elseif strcmp(parameters.data_type, 'fluorescence')
 
-    end
+            
+        else 
+            error('No matching data type.')
+        end 
+
+    end 
 
     % Remove any rows containing NaNs
     nan_rows = find(any(isnan(explanatoryVariables), 2));
