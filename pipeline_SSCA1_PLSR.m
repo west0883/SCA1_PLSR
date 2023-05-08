@@ -28,6 +28,7 @@ parameters.xDim = 256;
 parameters.conditions = {'withinMouse', 'acrossMice'};
 parameters.periods = {'rest', 'walk'}; % for across mice comparisons
 parameters.mouse_dates = {parameters.mice_all(:).date}; 
+parameters.data_types = {'fluor', 'corrs'};
 
 % Load periods_nametable_PLSR.m, if it exists yet. (Otherwise is created in
 % first step).
@@ -42,6 +43,8 @@ parameters.loop_variables.variable_type = {'response variables', 'correlations'}
 parameters.loop_variables.conditions = parameters.conditions; 
 parameters.loop_variables.periods = parameters.periods;
 parameters.loop_variables.mouse_dates = parameters.mouse_dates;
+parameters.loop_variables.data_types = parameters.data_types;
+
 parameters.average_and_std_together = false;
 
 %% WT mouse ICs
@@ -215,12 +218,12 @@ parameters.loop_list.things_to_load.dataset.level = 'mouse';
 
 % Output
 % single result
-parameters.loop_list.things_to_save.results.dir = {[parameters.dir_exper 'results within mice\'], 'mouse', '\'};
+parameters.loop_list.things_to_save.results.dir = {[parameters.dir_exper 'results within mice corrs\'], 'mouse', '\'};
 parameters.loop_list.things_to_save.results.filename= {'PLSR_results.mat'};
 parameters.loop_list.things_to_save.results.variable= {'PLSR_results'}; 
 parameters.loop_list.things_to_save.results.level = 'mouse';
 % random permutations
-parameters.loop_list.things_to_save.Covs_randomPermutations.dir = {[parameters.dir_exper 'results within mice\'], 'mouse', '\'};
+parameters.loop_list.things_to_save.Covs_randomPermutations.dir = {[parameters.dir_exper 'results within mice corrs\'], 'mouse', '\'};
 parameters.loop_list.things_to_save.Covs_randomPermutations.filename= {'PLSR_randomPermutations.mat'};
 parameters.loop_list.things_to_save.Covs_randomPermutations.variable= {'PLSR_randomPermutations'}; 
 parameters.loop_list.things_to_save.Covs_randomPermutations.level = 'mouse';
@@ -252,7 +255,7 @@ parameters.define_number_of_sources = true;
 parameters.isCorrelationMatrix = true;
 
 % Input
-parameters.loop_list.things_to_load.results.dir = {[parameters.dir_exper 'results within mice\'], 'mouse', '\'};
+parameters.loop_list.things_to_load.results.dir = {[parameters.dir_exper 'results within mice corrs\'], 'mouse', '\'};
 parameters.loop_list.things_to_load.results.filename= {'PLSR_results.mat'};
 parameters.loop_list.things_to_load.results.variable= {'PLSR_results'}; 
 parameters.loop_list.things_to_load.results.level = 'mouse';
@@ -263,37 +266,37 @@ parameters.loop_list.things_to_load.dataset.variable= {'dataset'};
 parameters.loop_list.things_to_load.dataset.level = 'mouse';
 
 % Output
-parameters.loop_list.things_to_save.fig_weights.dir = {[parameters.dir_exper 'results within mice\'], 'mouse', '\'};
+parameters.loop_list.things_to_save.fig_weights.dir = {[parameters.dir_exper 'results within mice corrs\'], 'mouse', '\'};
 parameters.loop_list.things_to_save.fig_weights.filename= {'PLSR_weights.fig'};
 parameters.loop_list.things_to_save.fig_weights.variable= {'fig_weights'}; 
 parameters.loop_list.things_to_save.fig_weights.level = 'mouse';
 
-parameters.loop_list.things_to_save.fig_MSEPs_explanatory.dir = {[parameters.dir_exper 'results within mice\'], 'mouse', '\'};
+parameters.loop_list.things_to_save.fig_MSEPs_explanatory.dir = {[parameters.dir_exper 'results within mice corrs\'], 'mouse', '\'};
 parameters.loop_list.things_to_save.fig_MSEPs_explanatory.filename= {'PLSR_MSEPs_explanatory.fig'};
 parameters.loop_list.things_to_save.fig_MSEPs_explanatory.variable= {'fig_MSEPs_explanatory'}; 
 parameters.loop_list.things_to_save.fig_MSEPs_explanatory.level = 'mouse';
 
-parameters.loop_list.things_to_save.fig_MSEPs_response.dir = {[parameters.dir_exper 'results within mice\'], 'mouse', '\'};
+parameters.loop_list.things_to_save.fig_MSEPs_response.dir = {[parameters.dir_exper 'results within mice corrs\'], 'mouse', '\'};
 parameters.loop_list.things_to_save.fig_MSEPs_response.filename= {'PLSR_MSEPs_response.fig'};
 parameters.loop_list.things_to_save.fig_MSEPs_response.variable= {'fig_MSEPs_response'}; 
 parameters.loop_list.things_to_save.fig_MSEPs_response.level = 'mouse';
 
-parameters.loop_list.things_to_save.fig_BICs_explanatory.dir = {[parameters.dir_exper 'results within mice\'], 'mouse', '\'};
+parameters.loop_list.things_to_save.fig_BICs_explanatory.dir = {[parameters.dir_exper 'results within mice corrs\'], 'mouse', '\'};
 parameters.loop_list.things_to_save.fig_BICs_explanatory.filename= {'PLSR_BICs_explanatory.fig'};
 parameters.loop_list.things_to_save.fig_BICs_explanatory.variable= {'fig_BICs_explanatory'}; 
 parameters.loop_list.things_to_save.fig_BICs_explanatory.level = 'mouse';
 
-parameters.loop_list.things_to_save.fig_BICs_response.dir = {[parameters.dir_exper 'results within mice\'], 'mouse', '\'};
+parameters.loop_list.things_to_save.fig_BICs_response.dir = {[parameters.dir_exper 'results within mice corrs\'], 'mouse', '\'};
 parameters.loop_list.things_to_save.fig_BICs_response.filename= {'PLSR_BICs_response.fig'};
 parameters.loop_list.things_to_save.fig_BICs_response.variable= {'fig_BICs_response'}; 
 parameters.loop_list.things_to_save.fig_BICs_response.level = 'mouse';
 
-parameters.loop_list.things_to_save.fig_PCTVARs_explanatory.dir = {[parameters.dir_exper 'results within mice\'], 'mouse', '\'};
+parameters.loop_list.things_to_save.fig_PCTVARs_explanatory.dir = {[parameters.dir_exper 'results within mice corrs\'], 'mouse', '\'};
 parameters.loop_list.things_to_save.fig_PCTVARs_explanatory.filename= {'PLSR_PCTVARs_explanatory.fig'};
 parameters.loop_list.things_to_save.fig_PCTVARs_explanatory.variable= {'fig_PCTVARs_explanatory'}; 
 parameters.loop_list.things_to_save.fig_PCTVARs_explanatory.level = 'mouse';
 
-parameters.loop_list.things_to_save.fig_PCTVARs_response.dir = {[parameters.dir_exper 'results within mice\'], 'mouse', '\'};
+parameters.loop_list.things_to_save.fig_PCTVARs_response.dir = {[parameters.dir_exper 'results within mice corrs\'], 'mouse', '\'};
 parameters.loop_list.things_to_save.fig_PCTVARs_response.filename= {'PLSR_PCTVARs_response.fig'};
 parameters.loop_list.things_to_save.fig_PCTVARs_response.variable= {'fig_PCTVARs_response'}; 
 parameters.loop_list.things_to_save.fig_PCTVARs_response.level = 'mouse';
@@ -316,7 +319,7 @@ parameters.adjust_beta = true;
 parameters.caxis = [-1.5 1.5];
 
 % Input 
-parameters.loop_list.things_to_load.results.dir = {[parameters.dir_exper 'results within mice\'], 'mouse', '\'};
+parameters.loop_list.things_to_load.results.dir = {[parameters.dir_exper 'results within mice corrs\'], 'mouse', '\'};
 parameters.loop_list.things_to_load.results.filename= {'PLSR_results.mat'};
 parameters.loop_list.things_to_load.results.variable= {'PLSR_results'}; 
 parameters.loop_list.things_to_load.results.level = 'mouse';
@@ -328,7 +331,7 @@ parameters.loop_list.things_to_load.dataset_info.variable= {'dataset'};
 parameters.loop_list.things_to_load.dataset_info.level = 'mouse';
 
 % Output
-parameters.loop_list.things_to_save.fig.dir = {[parameters.dir_exper 'results within mice\'], 'mouse', '\'};
+parameters.loop_list.things_to_save.fig.dir = {[parameters.dir_exper 'results within mice corrs\'], 'mouse', '\'};
 parameters.loop_list.things_to_save.fig.filename= {'PLSR_Cov.fig'};
 parameters.loop_list.things_to_save.fig.variable= {'fig'}; 
 parameters.loop_list.things_to_save.fig.level = 'mouse';
@@ -614,4 +617,87 @@ RunAnalysis({@PlotBetas}, parameters);
 
 close all;
 
-%% Across mice -- 
+%% Across mice -- find the brain regions you can use
+load('Y:\Sarah\Analysis\Experiments\SCA1 PLSR\data\mouse_007_CCA_by_behavior.mat', 'mouse_regions_ordered');
+m007_regions = mouse_regions_ordered;
+
+load('Y:\Sarah\Analysis\Experiments\SCA1 PLSR\data\mouse_819_CCA_by_behavior.mat', 'mouse_regions_ordered');
+m819_regions = mouse_regions_ordered;
+
+[common_regions, m007_indices, m819_indices] = intersect(m007_regions, m819_regions, 'stable');
+
+save([parameters.dir_exper 'common_regions.mat'], 'common_regions');
+save([parameters.dir_exper 'm007_region_indices.mat'],'m007_indices'); 
+save([parameters.dir_exper 'm819_region_indices.mat'],'m819_indices'); 
+
+clear m007_regions m819_regions common_regions m007_indices m819_indices;
+
+%% Across mice -- organize the brain regions
+% fluorescence
+
+for datai = 1:numel(parameters.data_types)
+    data_type = parameters.data_types{datai};
+
+    parameters.data_type = data_type;
+
+    if isfield(parameters, 'loop_list')
+    parameters = rmfield(parameters,'loop_list');
+    end
+    
+    % Iterators
+    parameters.loop_list.iterators = {'mouse', {'loop_variables.mice_all(:).name'}, 'mouse_iterator';
+                                      'period', {'loop_variables.periods'}, 'period_iterator'};
+    
+    % Inputs
+    % region indices
+    parameters.loop_list.things_to_load.region_indices.dir = {[parameters.dir_exper]};
+    parameters.loop_list.things_to_load.region_indices.filename= {'m', 'mouse', '_region_indices.mat'};
+    parameters.loop_list.things_to_load.region_indices.variable= {'m', 'mouse', '_indices'}; 
+    parameters.loop_list.things_to_load.region_indices.level = 'mouse';
+    % data 
+    parameters.loop_list.things_to_load.data.dir = {[parameters.dir_exper 'data\concatenated across trials\']};
+    if strcmp(data_type, 'fluor')
+        parameters.loop_list.things_to_load.data.filename= { [data_type '_'], 'mouse', '_', 'period', '_average.mat'};
+    else
+        parameters.loop_list.things_to_load.data.filename= { [data_type '_'], 'mouse', '_', 'period', '.mat'};
+    end
+    parameters.loop_list.things_to_load.data.variable= {[data_type '_all']}; 
+    parameters.loop_list.things_to_load.data.level = 'period';
+
+    % Outputs 
+    parameters.loop_list.things_to_save.data_new.dir = {[parameters.dir_exper 'data\shared regions\'], 'mouse', '\'};
+    parameters.loop_list.things_to_save.data_new.filename= {data_type, '_', 'period', '.mat'};
+    parameters.loop_list.things_to_save.data_new.variable = {'data_shared'}; 
+    parameters.loop_list.things_to_save.data_new.level = 'period';
+
+    RunAnalysis({@OnlySharedData}, parameters);
+
+end
+
+%% Across mice -- concatenate data within periods, across mice 
+% [no, you don't need to do this-- can put it in the dataset prep code]
+
+if isfield(parameters, 'loop_list')
+parameters = rmfield(parameters,'loop_list');
+end
+
+% Iterators
+parameters.loop_list.iterators = {'data_type', {'loop_variables.data_types'}, 'data_type_iterator';
+                                  'period', {'loop_variables.periods'}, 'period_iterator';
+                                  'mouse', {'loop_variables.mice_all(:).name'}, 'mouse_iterator'};
+
+parameters.data_type_looping = true;
+
+% Inputs 
+parameters.loop_list.things_to_load.data.dir = {[parameters.dir_exper 'data\shared regions\'], 'mouse', '\'};
+parameters.loop_list.things_to_load.data.filename= {data_type, '_', 'period', '.mat'};
+parameters.loop_list.things_to_load.data.variable = {'data_shared'}; 
+parameters.loop_list.things_to_load.data.level = 'mouse';
+
+% Outputs 
+parameters.loop_list.things_to_save.concatenated_data.dir = {[parameters.dir_exper 'data\shared regions\concatenated'], 'mouse', '\'};
+parameters.loop_list.things_to_save.concatenated_data.filename= {data_type, '_', 'period', '.mat'};
+parameters.loop_list.things_to_save.concatenated_data.variable = {'data_shared'}; 
+parameters.loop_list.things_to_save.concatenated_data.level = 'mouse';
+
+RunAnalysis({@DatasetPrep_SCA1Exper}, parameters)
