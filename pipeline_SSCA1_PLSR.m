@@ -365,6 +365,41 @@ parameters.loop_list.things_to_save.concatenated_data.level = 'period';
 
 RunAnalysis({@ConcatenateData}, parameters);
 
+%% Within mice fluorescence -- average by atlas area
+
+if isfield(parameters, 'loop_list')
+parameters = rmfield(parameters,'loop_list');
+end
+
+% Iterators
+parameters.loop_list.iterators = {'mouse', {'loop_variables.mice_all(:).name'}, 'mouse_iterator';
+                                  'period', {'loop_variables.periods'}, 'period_iterator'};
+parameters.IC_dim = 2; 
+% Inputs
+% concatenated trials
+parameters.loop_list.things_to_load.data.dir = {[parameters.dir_exper 'data\concatenated across trials\']};
+parameters.loop_list.things_to_load.data.filename= {'fluor_', 'mouse', '_','period', '.mat'};
+parameters.loop_list.things_to_load.data.variable= {'fluor_all'}; 
+parameters.loop_list.things_to_load.data.level = 'period';
+% atlas info
+parameters.loop_list.things_to_load.mouse_regions_ordered.dir = {[parameters.dir_exper 'data\']};
+parameters.loop_list.things_to_load.mouse_regions_ordered.filename= {'mouse_', 'mouse', '_CCA_by_behavior.mat'};
+parameters.loop_list.things_to_load.mouse_regions_ordered.variable= {'mouse_regions_ordered'}; 
+parameters.loop_list.things_to_load.mouse_regions_ordered.level = 'mouse';
+% IC atlas ids
+parameters.loop_list.things_to_load.atlas_ids.dir = {[parameters.dir_exper 'data\']};
+parameters.loop_list.things_to_load.atlas_ids.filename = {'mouse_', 'mouse', '_CCA_by_behavior.mat'};
+parameters.loop_list.things_to_load.atlas_ids.variable = {'IC_files.atlas_id'}; 
+parameters.loop_list.things_to_load.atlas_ids.level = 'mouse';
+
+% Outputs
+parameters.loop_list.things_to_save.data_averaged.dir = {[parameters.dir_exper 'data\fluoresce atlas averaged\']};
+parameters.loop_list.things_to_save.data_averaged.filename= {'fluor_', 'mouse','_', 'period', '.mat'};
+parameters.loop_list.things_to_save.data_averaged.variable= {'period', '_DFF'}; 
+parameters.loop_list.things_to_save.data_averaged.level = 'period';
+
+RunAnalysis({@FluorescenceByAtlasRegion}, parameters)
+
 %% Within mice fluorescence -- average per window/roll
 
 if isfield(parameters, 'loop_list')
@@ -378,9 +413,9 @@ parameters.loop_list.iterators = {'mouse', {'loop_variables.mice_all(:).name'}, 
 parameters.averageDim = 1; 
 
 % Inputs
-parameters.loop_list.things_to_load.data.dir = {[parameters.dir_exper 'data\concatenated across trials\']};
-parameters.loop_list.things_to_load.data.filename= {'fluor_', 'mouse', '_','period', '.mat'};
-parameters.loop_list.things_to_load.data.variable= {'fluor_all'}; 
+parameters.loop_list.things_to_load.data.dir = {[parameters.dir_exper 'data\fluoresce atlas averaged\']};
+parameters.loop_list.things_to_load.data.filename= {'fluor_', 'mouse','_', 'period', '.mat'};
+parameters.loop_list.things_to_load.data.variable= {'period', '_DFF'}; 
 parameters.loop_list.things_to_load.data.level = 'period';
 
 % Outputs
@@ -390,3 +425,193 @@ parameters.loop_list.things_to_save.average.variable= {'fluor_all'};
 parameters.loop_list.things_to_save.average.level = 'period';
 
 RunAnalysis({@AverageData}, parameters);
+
+%% Within mice fluorescence -- prepare datasets
+
+if isfield(parameters, 'loop_list')
+parameters = rmfield(parameters,'loop_list');
+end
+
+% Iterators
+parameters.loop_list.iterators = {'mouse', {'loop_variables.mice_all(:).name'}, 'mouse_iterator'};
+
+% Run Fisher transform? (on correlations only)
+parameters.data_type = 'fluorescence';
+
+% Inputs
+% rest
+parameters.loop_list.things_to_load.rest_data.dir = {[parameters.dir_exper 'data\concatenated across trials\']};
+parameters.loop_list.things_to_load.rest_data.filename= {'fluor_', 'mouse', '_rest_average.mat'};
+parameters.loop_list.things_to_load.rest_data.variable= {'fluor_all'}; 
+parameters.loop_list.things_to_load.rest_data.level = 'mouse';
+% walk
+parameters.loop_list.things_to_load.walk_data.dir = {[parameters.dir_exper 'data\concatenated across trials\']};
+parameters.loop_list.things_to_load.walk_data.filename= {'fluor_', 'mouse', '_walk_average.mat'};
+parameters.loop_list.things_to_load.walk_data.variable= {'fluor_all'}; 
+parameters.loop_list.things_to_load.walk_data.level = 'mouse';
+
+% Outputs 
+parameters.loop_list.things_to_save.dataset.dir = {[parameters.dir_exper 'data\for PLSR\fluorescence\']};
+parameters.loop_list.things_to_save.dataset.filename= {'dataset_info_', 'mouse', '.mat'};
+parameters.loop_list.things_to_save.dataset.variable= {'dataset'}; 
+parameters.loop_list.things_to_save.dataset.level = 'mouse';
+
+RunAnalysis({@DatasetPrep_SCA1Exper}, parameters)
+
+%% Within mice fluorescence, run PLSR
+% Will look at the outputs from 10 calculated components.
+
+% Always clear loop list first. 
+if isfield(parameters, 'loop_list')
+parameters = rmfield(parameters,'loop_list');
+end
+
+% Iterators
+parameters.loop_list.iterators = {
+               'mouse', {'loop_variables.mice_all(:).name'}, 'mouse_iterator'}; 
+
+% Parameters for calculating best number of components. If
+% "findBestNComponents" = false, just run the ncomponents_max
+parameters.findBestNComponents = true;
+parameters.ncomponents_max = 10; 
+parameters.contiguous_partitions = true; 
+parameters.kFolds = 10;
+parameters.MonteCarloReps = 10;
+parameters.comparison_type = 'categorical';
+parameters.stratify = true;
+
+% Do you want permutations?
+parameters.permutationGeneration = true;
+parameters.n_permutations = 5000;
+
+% Input 
+parameters.loop_list.things_to_load.dataset.dir = {[parameters.dir_exper 'data\for PLSR\fluorescence\']};
+parameters.loop_list.things_to_load.dataset.filename= {'dataset_info_', 'mouse', '.mat'};
+parameters.loop_list.things_to_load.dataset.variable= {'dataset'}; 
+parameters.loop_list.things_to_load.dataset.level = 'mouse';
+
+% Output
+% single result
+parameters.loop_list.things_to_save.results.dir = {[parameters.dir_exper 'results within mice fluorescence\'], 'mouse', '\'};
+parameters.loop_list.things_to_save.results.filename= {'PLSR_results.mat'};
+parameters.loop_list.things_to_save.results.variable= {'PLSR_results'}; 
+parameters.loop_list.things_to_save.results.level = 'mouse';
+% random permutations
+parameters.loop_list.things_to_save.Covs_randomPermutations.dir = {[parameters.dir_exper 'results within mice fluorescence\'], 'mouse', '\'};
+parameters.loop_list.things_to_save.Covs_randomPermutations.filename= {'PLSR_randomPermutations.mat'};
+parameters.loop_list.things_to_save.Covs_randomPermutations.variable= {'PLSR_randomPermutations'}; 
+parameters.loop_list.things_to_save.Covs_randomPermutations.level = 'mouse';
+
+RunAnalysis({@PLSR_forRunAnalysis}, parameters);  
+
+parameters.findBestNComponents = false;
+parameters.permutationGeneration = false;
+
+%% Within mice -- check components
+% Always clear loop list first. 
+if isfield(parameters, 'loop_list')
+parameters = rmfield(parameters,'loop_list');
+end
+
+% Iterators
+parameters.loop_list.iterators = {
+               'mouse', {'loop_variables.mice_all(:).name'}, 'mouse_iterator'}; 
+               
+parameters.max_response_vars = 2;
+
+parameters.plot_weights = true;
+parameters.plot_MSEPs = true;
+parameters.plot_BICs = true;
+parameters.plot_percentVars = true;
+parameters.plot_PCTVAR_response = true;
+
+parameters.isCorrelationMatrix = false;
+parameters.define_number_of_sources = false;
+
+% Input
+parameters.loop_list.things_to_load.results.dir = {[parameters.dir_exper 'results within mice fluorescence\'], 'mouse', '\'};
+parameters.loop_list.things_to_load.results.filename= {'PLSR_results.mat'};
+parameters.loop_list.things_to_load.results.variable= {'PLSR_results'}; 
+parameters.loop_list.things_to_load.results.level = 'mouse';
+
+parameters.loop_list.things_to_load.dataset.dir = {[parameters.dir_exper 'data\for PLSR\']};
+parameters.loop_list.things_to_load.dataset.filename= {'dataset_info_', 'mouse', '.mat'};
+parameters.loop_list.things_to_load.dataset.variable= {'dataset'}; 
+parameters.loop_list.things_to_load.dataset.level = 'mouse';
+
+% Output
+parameters.loop_list.things_to_save.fig_weights.dir = {[parameters.dir_exper 'results within mice fluorescence\'], 'mouse', '\'};
+parameters.loop_list.things_to_save.fig_weights.filename= {'PLSR_weights.fig'};
+parameters.loop_list.things_to_save.fig_weights.variable= {'fig_weights'}; 
+parameters.loop_list.things_to_save.fig_weights.level = 'mouse';
+
+parameters.loop_list.things_to_save.fig_MSEPs_explanatory.dir = {[parameters.dir_exper 'results within mice fluorescence\'], 'mouse', '\'};
+parameters.loop_list.things_to_save.fig_MSEPs_explanatory.filename= {'PLSR_MSEPs_explanatory.fig'};
+parameters.loop_list.things_to_save.fig_MSEPs_explanatory.variable= {'fig_MSEPs_explanatory'}; 
+parameters.loop_list.things_to_save.fig_MSEPs_explanatory.level = 'mouse';
+
+parameters.loop_list.things_to_save.fig_MSEPs_response.dir = {[parameters.dir_exper 'results within mice fluorescence\'], 'mouse', '\'};
+parameters.loop_list.things_to_save.fig_MSEPs_response.filename= {'PLSR_MSEPs_response.fig'};
+parameters.loop_list.things_to_save.fig_MSEPs_response.variable= {'fig_MSEPs_response'}; 
+parameters.loop_list.things_to_save.fig_MSEPs_response.level = 'mouse';
+
+parameters.loop_list.things_to_save.fig_BICs_explanatory.dir = {[parameters.dir_exper 'results within mice fluorescence\'], 'mouse', '\'};
+parameters.loop_list.things_to_save.fig_BICs_explanatory.filename= {'PLSR_BICs_explanatory.fig'};
+parameters.loop_list.things_to_save.fig_BICs_explanatory.variable= {'fig_BICs_explanatory'}; 
+parameters.loop_list.things_to_save.fig_BICs_explanatory.level = 'mouse';
+
+parameters.loop_list.things_to_save.fig_BICs_response.dir = {[parameters.dir_exper 'results within mice fluorescence\'], 'mouse', '\'};
+parameters.loop_list.things_to_save.fig_BICs_response.filename= {'PLSR_BICs_response.fig'};
+parameters.loop_list.things_to_save.fig_BICs_response.variable= {'fig_BICs_response'}; 
+parameters.loop_list.things_to_save.fig_BICs_response.level = 'mouse';
+
+parameters.loop_list.things_to_save.fig_PCTVARs_explanatory.dir = {[parameters.dir_exper 'results within mice fluorescence\'], 'mouse', '\'};
+parameters.loop_list.things_to_save.fig_PCTVARs_explanatory.filename= {'PLSR_PCTVARs_explanatory.fig'};
+parameters.loop_list.things_to_save.fig_PCTVARs_explanatory.variable= {'fig_PCTVARs_explanatory'}; 
+parameters.loop_list.things_to_save.fig_PCTVARs_explanatory.level = 'mouse';
+
+parameters.loop_list.things_to_save.fig_PCTVARs_response.dir = {[parameters.dir_exper 'results within mice fluorescence\'], 'mouse', '\'};
+parameters.loop_list.things_to_save.fig_PCTVARs_response.filename= {'PLSR_PCTVARs_response.fig'};
+parameters.loop_list.things_to_save.fig_PCTVARs_response.variable= {'fig_PCTVARs_response'}; 
+parameters.loop_list.things_to_save.fig_PCTVARs_response.level = 'mouse';
+
+RunAnalysis({@CheckComponents}, parameters);
+
+close all;
+
+%% Within mice fluorescence -- plot Covs ("betas")
+if isfield(parameters, 'loop_list')
+parameters = rmfield(parameters,'loop_list');
+end
+
+% Iterators
+parameters.loop_list.iterators = {
+               'mouse', {'loop_variables.mice_all(:).name'}, 'mouse_iterator'
+               };
+% Adjust beta values based on zscore sigmas?
+parameters.adjust_beta = true;
+%parameters.caxis = [-10 10];
+
+% Input 
+parameters.loop_list.things_to_load.results.dir = {[parameters.dir_exper 'results within mice fluorescence\'], 'mouse', '\'};
+parameters.loop_list.things_to_load.results.filename= {'PLSR_results.mat'};
+parameters.loop_list.things_to_load.results.variable= {'PLSR_results'}; 
+parameters.loop_list.things_to_load.results.level = 'mouse';
+
+% Also load in dataset values for the zscore sigma.
+parameters.loop_list.things_to_load.dataset_info.dir = {[parameters.dir_exper 'data\for PLSR\fluorescence\']};
+parameters.loop_list.things_to_load.dataset_info.filename= {'dataset_info_', 'mouse', '.mat'};
+parameters.loop_list.things_to_load.dataset_info.variable= {'dataset'}; 
+parameters.loop_list.things_to_load.dataset_info.level = 'mouse';
+
+% Output
+parameters.loop_list.things_to_save.fig.dir = {[parameters.dir_exper 'results within mice fluorescence\'], 'mouse', '\'};
+parameters.loop_list.things_to_save.fig.filename= {'PLSR_Cov.fig'};
+parameters.loop_list.things_to_save.fig.variable= {'fig'}; 
+parameters.loop_list.things_to_save.fig.level = 'mouse';
+
+RunAnalysis({@PlotBetas}, parameters); 
+
+close all;
+
+%% Across mice -- 
