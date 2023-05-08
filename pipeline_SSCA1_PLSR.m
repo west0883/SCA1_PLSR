@@ -156,6 +156,7 @@ end
 parameters.loop_list.iterators = {'mouse', {'loop_variables.mice_all(:).name'}, 'mouse_iterator'};
 
 % Run Fisher transform? (on correlations only)
+parameters.data_type = 'correlations';
 parameters.run_FisherTransform = true;
 
 % Inputs
@@ -248,6 +249,7 @@ parameters.plot_percentVars = true;
 parameters.plot_PCTVAR_response = true;
 
 parameters.define_number_of_sources = true;
+parameters.isCorrelationMatrix = true;
 
 % Input
 parameters.loop_list.things_to_load.results.dir = {[parameters.dir_exper 'results within mice\'], 'mouse', '\'};
