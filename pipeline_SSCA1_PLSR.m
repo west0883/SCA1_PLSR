@@ -81,8 +81,7 @@ colormap(mymap);
 sgtitle('WT mouse')
 
 %% Overlay SCA1 mouse
-
-load('mouse_007_CCA_by_behavior_07-01-2021.mat');
+load([parameters.dir_exper 'data/mouse_819_CCA_by_behavior.mat'])
 holder = ones(256) .* (size(IC_files.dom_list, 3) + 1) ;
 for i = 1:size(IC_files.dom_list, 3)
     indices = find(IC_files.dom_list(:, :, i)~=0);
@@ -108,7 +107,7 @@ colormap(mymap);
 sgtitle('WT mouse')
 
 %% Overlay atlas IDs SCA1 mouse
-load('mouse_007_CCA_by_behavior_07-01-2021.mat');
+load([parameters.dir_exper 'data/mouse_007_CCA_by_behavior.mat'])
 holder = ones(256) * (max(IC_files.atlas_id) + 1);
 for i = 1:size(IC_files.dom_list, 3)
     indices = find(IC_files.dom_list(:, :, i)~=0);
@@ -335,6 +334,7 @@ parameters.loop_list.things_to_save.fig.level = 'mouse';
 RunAnalysis({@PlotBetas}, parameters); 
 
 close all;
+
 
 %% Within mice fluorescence -- Concatenate all trials 
 
